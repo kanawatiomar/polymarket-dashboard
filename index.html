@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>POLY ARB · Live Positions</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #020a04;
+    --surface: #061009;
+    --surface2: #0a1a0e;
+    --border: rgba(0,255,100,0.12);
+    --green: #00ff88;
+    --green-dim: #00c966;
+    --red: #ff4545;
+    --amber: #ffb300;
+    --blue: #4db8ff;
+    --text: #7dc891;
+    --text-bright: #c8f0d4;
+    --text-dim: #3a5a44;
+    --glow: rgba(0,255,136,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* Grid bg */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 0 80px; }
+
+  /* ── HEADER ── */
+  header {
+    padding: 20px 16px 14px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,255,136,0.04) 0%, transparent 100%);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(0,255,136,0.5);
+  }
+
+  .logo span {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 10px;
+    letter-spacing: 2px;
+    display: block;
+    margin-top: 1px;
+  }
+
+  .refresh-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+    50% { opacity: 0.6; transform: scale(0.9); box-shadow: 0 0 0 4px rgba(0,255,136,0); }
+  }
+
+  .header-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+
+  .stat-chip .label { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-chip .value { font-size: 14px; color: var(--text-bright); margin-top: 2px; }
+  .stat-chip .value.green { color: var(--green); }
+  .stat-chip .value.red { color: var(--red); }
+  .stat-chip .value.amber { color: var(--amber); }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 16px 16px 0;
+  }
+
+  .section-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── POSITION CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .card.live::before   { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .card.pending::before { background: var(--amber); }
+  .card.filled::before  { background: var(--blue); }
+  .card.won::before     { background: var(--green); }
+  .card.lost::before    { background: var(--red); }
+  .card.cancelled::before { background: var(--text-dim); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  .card-question {
+    font-size: 11px;
+    color: var(--text-bright);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .badge {
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .badge.live    { background: rgba(0,255,136,0.12); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+  .badge.pending { background: rgba(255,179,0,0.12); color: var(--amber); border: 1px solid rgba(255,179,0,0.3); }
+  .badge.filled  { background: rgba(77,184,255,0.12); color: var(--blue); border: 1px solid rgba(77,184,255,0.3); }
+  .badge.won     { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.4); }
+  .badge.lost    { background: rgba(255,69,69,0.12); color: var(--red); border: 1px solid rgba(255,69,69,0.3); }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .card-field .label { font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+  .card-field .val   { font-size: 13px; color: var(--text-bright); margin-top: 2px; }
+  .card-field .val.buy-yes { color: var(--green); }
+  .card-field .val.buy-no  { color: var(--red); }
+
+  .card-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .card-bar .pnl.pos { color: var(--green); }
+  .card-bar .pnl.neg { color: var(--red); }
+  .card-bar .countdown { color: var(--amber); font-size: 10px; }
+
+  /* ── SUMMARY ── */
+  .summary {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: rgba(2,10,4,0.95);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .sum-item { text-align: center; }
+  .sum-item .label { font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+  .sum-item .val   { font-size: 13px; color: var(--text-bright); margin-top: 2px; }
+  .sum-item .val.green { color: var(--green); }
+  .sum-item .val.red   { color: var(--red); }
+
+  /* ── LOADING ── */
+  #loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── EMPTY ── */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  /* ── ERROR BANNER ── */
+  .error-banner {
+    margin: 16px;
+    padding: 12px;
+    background: rgba(255,69,69,0.08);
+    border: 1px solid rgba(255,69,69,0.3);
+    border-radius: 8px;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── WALLET ── */
+  .wallet-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .wallet-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+
+  @media (max-width: 360px) {
+    .logo { font-size: 18px; }
+    .card-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        POLY ARB
+        <span>WEATHER ARBITRAGE TERMINAL</span>
+      </div>
+      <div class="refresh-pill">
+        <div class="pulse-dot" id="pulse"></div>
+        <span id="refresh-timer">30s</span>
+      </div>
+    </div>
+    <div class="wallet-row">
+      <div class="wallet-dot"></div>
+      <span id="wallet-addr">loading...</span>
+    </div>
+    <div class="header-stats">
+      <div class="stat-chip">
+        <div class="label">USDC Balance</div>
+        <div class="value green" id="h-balance">—</div>
+      </div>
+      <div class="stat-chip">
+        <div class="label">Invested</div>
+        <div class="value amber" id="h-invested">—</div>
+      </div>
+      <div class="stat-chip">
+        <div class="label">P&amp;L</div>
+        <div class="value" id="h-pnl">—</div>
+      </div>
+    </div>
+  </header>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    FETCHING POSITIONS
+  </div>
+
+  <div id="main" style="display:none">
+    <div class="section" id="open-section">
+      <div class="section-title">Open Orders</div>
+      <div id="open-cards"></div>
+    </div>
+    <div class="section" id="filled-section" style="display:none">
+      <div class="section-title">Filled / Resolved</div>
+      <div id="filled-cards"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="summary" id="summary" style="display:none">
+  <div class="sum-item">
+    <div class="label">Positions</div>
+    <div class="val" id="s-count">—</div>
+  </div>
+  <div class="sum-item">
+    <div class="label">At Stake</div>
+    <div class="val amber" id="s-cost">—</div>
+  </div>
+  <div class="sum-item">
+    <div class="label">If All Win</div>
+    <div class="val green" id="s-payout">—</div>
+  </div>
+  <div class="sum-item">
+    <div class="label">Net P&amp;L</div>
+    <div class="val" id="s-pnl">—</div>
+  </div>
+</div>
+
+<script>
+const DATA_URL = './data.json';
+let refreshInterval = 30;
+let ticker;
+let data = null;
+
+function fmt$(n) { return '$' + Math.abs(parseFloat(n)||0).toFixed(2); }
+function fmtSign$(n) { return (n >= 0 ? '+$' : '-$') + Math.abs(parseFloat(n)||0).toFixed(2); }
+
+function countdown(isoDate) {
+  if (!isoDate) return '—';
+  const end = new Date(isoDate).getTime();
+  const now = Date.now();
+  const diff = end - now;
+  if (diff <= 0) return 'RESOLVED';
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  if (h > 24) return Math.floor(h/24) + 'd ' + (h%24) + 'h';
+  return h + 'h ' + m + 'm';
+}
+
+function statusBadge(status) {
+  const map = {
+    live: 'LIVE', pending: 'PENDING', delayed: 'PENDING',
+    filled: 'FILLED', won: 'WON ✓', lost: 'LOST ✗', cancelled: 'CANCELLED'
+  };
+  return map[status] || status.toUpperCase();
+}
+
+function renderCard(pos) {
+  const st = (pos.status || 'live').toLowerCase().replace('delayed','pending');
+  const signal = pos.signal || 'YES';
+  const signalClass = signal === 'YES' ? 'buy-yes' : 'buy-no';
+
+  const price   = parseFloat(pos.price || 0);
+  const size    = parseFloat(pos.size  || 0);
+  const cost    = parseFloat(pos.cost  || price * size);
+  const payout  = parseFloat(pos.potential_payout || size);
+  const curPx   = parseFloat(pos.current_price || price);
+  const pnl     = (st === 'won') ? payout - cost : (st === 'lost') ? -cost : (curPx - price) * size;
+  const pnlCls  = pnl >= 0 ? 'pos' : 'neg';
+
+  const resolves = pos.resolves_at || (pos.market_date ? pos.market_date + 'T23:59:00Z' : null);
+  const timer = countdown(resolves);
+
+  return `
+    <div class="card ${st}">
+      <div class="card-header">
+        <div class="card-question">${pos.question || 'Unknown market'}</div>
+        <div class="badge ${st}">${statusBadge(st)}</div>
+      </div>
+      <div class="card-grid">
+        <div class="card-field">
+          <div class="label">Signal</div>
+          <div class="val ${signalClass}">BUY ${signal}</div>
+        </div>
+        <div class="card-field">
+          <div class="label">Entry</div>
+          <div class="val">${(price*100).toFixed(1)}¢</div>
+        </div>
+        <div class="card-field">
+          <div class="label">Shares</div>
+          <div class="val">${Math.round(size)}</div>
+        </div>
+        <div class="card-field">
+          <div class="label">Cost</div>
+          <div class="val">${fmt$(cost)}</div>
+        </div>
+        <div class="card-field">
+          <div class="label">Payout</div>
+          <div class="val green">${fmt$(payout)}</div>
+        </div>
+        <div class="card-field">
+          <div class="label">Edge</div>
+          <div class="val">${pos.edge ? (parseFloat(pos.edge)*100).toFixed(0)+'%' : '—'}</div>
+        </div>
+      </div>
+      <div class="card-bar">
+        <span>${pos.market_date || '—'}</span>
+        <span class="pnl ${pnlCls}">${fmtSign$(pnl)}</span>
+        <span class="countdown">${timer === 'RESOLVED' ? '✓ RESOLVED' : 'closes in ' + timer}</span>
+      </div>
+    </div>`;
+}
+
+function render(d) {
+  data = d;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  document.getElementById('summary').style.display = 'grid';
+
+  // Header
+  const wallet = d.wallet || '';
+  document.getElementById('wallet-addr').textContent =
+    wallet ? wallet.slice(0,6) + '...' + wallet.slice(-4) : '—';
+  document.getElementById('h-balance').textContent = fmt$(d.usdc_balance);
+
+  const allPos = [...(d.open_orders || []), ...(d.filled_positions || [])];
+  const invested = allPos.reduce((s,p) => s + parseFloat(p.cost || 0), 0);
+  const realizedPnl = (d.filled_positions || []).reduce((s,p) => {
+    const st = p.status;
+    const cost = parseFloat(p.cost || 0);
+    const pay  = parseFloat(p.potential_payout || p.size || 0);
+    return s + (st === 'won' ? pay - cost : st === 'lost' ? -cost : 0);
+  }, 0);
+
+  document.getElementById('h-invested').textContent = fmt$(invested);
+  const pnlEl = document.getElementById('h-pnl');
+  pnlEl.textContent = fmtSign$(realizedPnl);
+  pnlEl.className = 'value ' + (realizedPnl >= 0 ? 'green' : 'red');
+
+  // Open orders
+  const open = d.open_orders || [];
+  const openSection = document.getElementById('open-section');
+  if (open.length === 0) {
+    document.getElementById('open-cards').innerHTML = '<div class="empty">NO OPEN ORDERS</div>';
+  } else {
+    document.getElementById('open-cards').innerHTML = open.map(renderCard).join('');
+  }
+
+  // Filled
+  const filled = d.filled_positions || [];
+  const filledSection = document.getElementById('filled-section');
+  if (filled.length > 0) {
+    filledSection.style.display = 'block';
+    document.getElementById('filled-cards').innerHTML = filled.map(renderCard).join('');
+  }
+
+  // Summary bar
+  const potentialPayout = open.reduce((s,p) => s + parseFloat(p.potential_payout || p.size || 0), 0);
+  document.getElementById('s-count').textContent = open.length;
+  document.getElementById('s-cost').textContent = fmt$(invested);
+  document.getElementById('s-payout').textContent = fmt$(potentialPayout + invested);
+
+  const totalPnl = realizedPnl;
+  const sPnl = document.getElementById('s-pnl');
+  sPnl.textContent = fmtSign$(totalPnl);
+  sPnl.className = 'val ' + (totalPnl >= 0 ? 'green' : 'red');
+
+  // Timestamp
+  if (d.updated) {
+    const dt = new Date(d.updated);
+    document.getElementById('refresh-timer').textContent =
+      dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').innerHTML = `<div class="error-banner">⚠ ${msg}</div>`;
+  document.getElementById('main').style.display = 'block';
+}
+
+async function fetchData() {
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    render(d);
+  } catch(e) {
+    if (!data) showError('Cannot load data.json — ' + e.message);
+  }
+}
+
+// Auto refresh countdown
+function startTicker() {
+  clearInterval(ticker);
+  let t = refreshInterval;
+  ticker = setInterval(() => {
+    t--;
+    if (t <= 0) { t = refreshInterval; fetchData(); }
+    if (data) {
+      document.getElementById('refresh-timer').textContent = t + 's';
+    }
+  }, 1000);
+}
+
+fetchData();
+startTicker();
+
+// Countdown timers live update every minute
+setInterval(() => {
+  if (data) document.querySelectorAll('.countdown').forEach(el => {
+    // re-render would be cleaner but this is fine for now
+  });
+}, 60000);
+</script>
+</body>
+</html>
