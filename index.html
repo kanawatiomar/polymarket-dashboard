@@ -621,6 +621,32 @@ const DATA_URL = './data.json';
 let refreshInterval = 30;
 let ticker;
 let data = null;
+let liveprices = {}; // token_id -> current price, fetched directly from Polymarket
+
+async function fetchLivePrices(tokenIds) {
+  const unique = [...new Set(tokenIds.filter(Boolean))];
+  await Promise.all(unique.map(async tid => {
+    try {
+      const r = await fetch(`https://clob.polymarket.com/last-trade-price?token_id=${tid}`);
+      const d = await r.json();
+      const p = parseFloat(d.price || 0);
+      if (p > 0) liveprices[tid] = p;
+    } catch {}
+    if (!liveprices[tid]) {
+      try {
+        const r = await fetch(`https://clob.polymarket.com/midpoint?token_id=${tid}`);
+        const d = await r.json();
+        const p = parseFloat(d.mid || 0);
+        if (p > 0) liveprices[tid] = p;
+      } catch {}
+    }
+  }));
+}
+
+function getLivePrice(pos) {
+  const tid = pos.token_id || pos.token_id;
+  return liveprices[tid] ?? pos.current_price ?? null;
+}
 
 function fmt$(n) { return '$' + Math.abs(parseFloat(n)||0).toFixed(2); }
 function fmtSign$(n) { return (n >= 0 ? '+$' : '-$') + Math.abs(parseFloat(n)||0).toFixed(2); }
@@ -693,9 +719,11 @@ function renderUFCCard(bet) {
       </div>
 
       <div class="ufc-odds-bar">
-        <span class="odds-val">BUY @ ${(price * 100).toFixed(0)}% → ${bet.current_price != null ? (parseFloat(bet.current_price)*100).toFixed(0)+'%' : '—'}</span>
+        ${(() => { const lp = getLivePrice(bet); const upnl = lp != null ? (lp - price) * parseFloat(bet.shares||0) : null; return `
+        <span class="odds-val">BUY @ ${(price * 100).toFixed(0)}% → ${lp != null ? (lp*100).toFixed(0)+'%' : '—'}</span>
         <span class="shares">${bet.shares} shares</span>
-        ${bet.unrealized_pnl != null ? `<span class="mult-val ${parseFloat(bet.unrealized_pnl) >= 0 ? 'pnl pos' : 'pnl neg'}">${fmtSign$(bet.unrealized_pnl)}</span>` : `<span class="mult-val">${mult.toFixed(2)}x</span>`}
+        ${upnl != null ? `<span class="mult-val pnl ${upnl >= 0 ? 'pos' : 'neg'}">${fmtSign$(upnl)}</span>` : `<span class="mult-val">${mult.toFixed(2)}x</span>`}
+        `; })()}
       </div>
     </div>`;
 }
@@ -710,11 +738,9 @@ function renderCard(pos) {
   const filled  = parseFloat(pos.filled || 0);
   const cost    = parseFloat(pos.cost  || price * size);
   const payout  = parseFloat(pos.potential_payout || size);
-  const curPx   = pos.current_price != null ? parseFloat(pos.current_price) : null;
-  // P&L: use unrealized_pnl from data if available, else calculate from filled shares
+  const curPx   = getLivePrice(pos);
   const pnl     = (st === 'won') ? payout - cost
                 : (st === 'lost') ? -cost
-                : (pos.unrealized_pnl != null) ? parseFloat(pos.unrealized_pnl)
                 : (curPx != null && filled > 0) ? (curPx - price) * filled
                 : 0;
   const pnlCls  = pnl >= 0 ? 'pos' : 'neg';
@@ -826,11 +852,17 @@ function render(d) {
 
   document.getElementById('h-invested').textContent = fmt$(invested);
 
-  // Unrealized P&L across all open positions + UFC bets
-  const unrealizedWeather = (d.open_orders || []).reduce((s,p) =>
-    s + (p.unrealized_pnl != null ? parseFloat(p.unrealized_pnl) : 0), 0);
-  const unrealizedUFC = (d.ufc_bets || []).reduce((s,b) =>
-    s + (b.unrealized_pnl != null ? parseFloat(b.unrealized_pnl) : 0), 0);
+  // Unrealized P&L — use live prices fetched directly from Polymarket
+  const unrealizedWeather = (d.open_orders || []).reduce((s,p) => {
+    const lp = getLivePrice(p);
+    const filled = parseFloat(p.filled || 0);
+    return s + (lp != null && filled > 0 ? (lp - p.price) * filled : 0);
+  }, 0);
+  const unrealizedUFC = (d.ufc_bets || []).reduce((s,b) => {
+    const lp = getLivePrice(b);
+    const shares = parseFloat(b.shares || 0);
+    return s + (lp != null && shares > 0 ? (lp - b.price) * shares : 0);
+  }, 0);
   const totalPnlDisplay = realizedPnl + unrealizedWeather + unrealizedUFC;
 
   const pnlEl = document.getElementById('h-pnl');
@@ -890,6 +922,16 @@ async function fetchData() {
     const r = await fetch(DATA_URL + '?t=' + Date.now());
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
+
+    // Collect all token IDs and fetch live prices from Polymarket directly
+    const allPos = [...(d.open_orders||[]), ...(d.filled_positions||[])];
+    const allBets = d.ufc_bets || [];
+    const tokenIds = [
+      ...allPos.map(p => p.token_id),
+      ...allBets.map(b => b.token_id)
+    ];
+    await fetchLivePrices(tokenIds);
+
     render(d);
   } catch(e) {
     if (!data) showError('Cannot load data.json — ' + e.message);
