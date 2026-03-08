@@ -308,6 +308,33 @@
     transition: width 0.6s ease;
   }
 
+  /* ── FILL PROGRESS ── */
+  .fill-progress {
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  .fill-progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .fill-progress-header .fill-pct { color: var(--amber); }
+  .fill-track {
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .fill-bar {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+    box-shadow: 0 0 6px rgba(255,179,0,0.4);
+  }
+
   /* ── SUMMARY ── */
   .summary {
     position: fixed;
@@ -513,6 +540,23 @@ function renderCard(pos) {
   const fillPct   = cost > 0 ? Math.min(100, (cost / payout) * 100) : 0;
   const profit    = payout - cost;
 
+  // Fill progress (for open orders)
+  const orderFilled    = parseFloat(pos.filled    || 0);
+  const orderOriginal  = parseFloat(pos.size      || size);
+  const orderFillPct   = orderOriginal > 0 ? Math.min(100, (orderFilled / orderOriginal) * 100) : 0;
+  const isOpen         = (st === 'live' || st === 'pending');
+  const fillProgressHtml = isOpen ? `
+    <div class="fill-progress">
+      <div class="fill-progress-header">
+        <span>ORDER FILL</span>
+        <span>${Math.round(orderFilled)} / ${Math.round(orderOriginal)} shares</span>
+        <span class="fill-pct">${orderFillPct.toFixed(0)}% filled</span>
+      </div>
+      <div class="fill-track">
+        <div class="fill-bar" style="width:${orderFillPct.toFixed(1)}%"></div>
+      </div>
+    </div>` : '';
+
   return `
     <div class="card ${st}">
       <div class="card-header">
@@ -539,6 +583,8 @@ function renderCard(pos) {
       <div class="reward-fill-track">
         <div class="reward-fill-bar" style="width:${fillPct.toFixed(1)}%"></div>
       </div>
+
+      ${fillProgressHtml}
 
       <div class="card-grid" style="margin-top:10px">
         <div class="card-field">
