@@ -22,8 +22,8 @@
       "status": "live",
       "market_date": "2026-03-08",
       "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313",
-      "current_price": 0.025,
-      "unrealized_pnl": 0.448
+      "current_price": 0.001,
+      "unrealized_pnl": -0.7467
     },
     {
       "order_id": "0xc900f141cf4b9bf1c24be9354c49a439fd0122e1fdce806edbd1e05caf165191",
@@ -62,8 +62,8 @@
       "status": "live",
       "market_date": "2026-03-08",
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969",
-      "current_price": 0.054,
-      "unrealized_pnl": 0.15
+      "current_price": 0.028,
+      "unrealized_pnl": -0.63
     },
     {
       "order_id": "0x90d267344ad633e6a01a82127d4d18287b9d62a68e9bca9549c0826f0dfc74bd",
@@ -82,8 +82,8 @@
       "status": "live",
       "market_date": "2026-03-08",
       "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313",
-      "current_price": 0.025,
-      "unrealized_pnl": 0.0601
+      "current_price": 0.001,
+      "unrealized_pnl": -0.4205
     },
     {
       "order_id": "0x20834aefd52625e48d18780ce4808a8b3463a3f012df735f1f3c26f62743e52e",
@@ -102,8 +102,8 @@
       "status": "live",
       "market_date": "2026-03-09",
       "token_id": "57811390198218385729739945574115066200270959579513350081008368281066931707447",
-      "current_price": 0.048,
-      "unrealized_pnl": 0.0391
+      "current_price": 0.01,
+      "unrealized_pnl": -0.7042
     },
     {
       "order_id": "0x10363c57a1bb2395a3bfe86e08122d60f577ecb6bddd9729eff8561bd45f4b54",
@@ -122,7 +122,7 @@
       "status": "live",
       "market_date": "2026-03-09",
       "token_id": "28994121935632959363595856067888751246209590118819252326795343390724779430366",
-      "current_price": 0.022,
+      "current_price": 0.01,
       "unrealized_pnl": null
     }
   ],
@@ -144,8 +144,8 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "92779591599984128382137077564150071340567282117853030157887422197097013144677",
-      "current_price": 0.042,
-      "unrealized_pnl": 1.231
+      "current_price": 0.027,
+      "unrealized_pnl": -0.6155
     },
     {
       "order_id": "0x2cb4b63fa855642d11db69473fd918f245639f586817f62d9a0b7f817457a152",
@@ -164,8 +164,8 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969",
-      "current_price": 0.054,
-      "unrealized_pnl": -0.625
+      "current_price": 0.028,
+      "unrealized_pnl": -2.25
     },
     {
       "order_id": "0x1d8eed54fabfee18e0639a75c2b55ae9cfdb1a9a6b41ed116ae33dda3bb1cff5",
@@ -184,8 +184,8 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "84523408181845963854368086208770577920218419684876378520249706569470808197607",
-      "current_price": 0.6,
-      "unrealized_pnl": 0.068
+      "current_price": 0.63,
+      "unrealized_pnl": 0.272
     },
     {
       "order_id": "0xddae3d76a66f732188dda7cc06ddb1c9a2a84e60716793092c733ce1d9221cf9",
@@ -204,8 +204,8 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "91292678684465389346672483369427722609136547827631868623511258615182989629826",
-      "current_price": 0.53,
-      "unrealized_pnl": -0.213
+      "current_price": 0.56,
+      "unrealized_pnl": 0
     }
   ],
   "ufc_bets": [
