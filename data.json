@@ -225,7 +225,7 @@
         "0x0af64456d129460cd15f51992c619da3eedcee419876d672199ac1c91925e6cf",
         "0x56aa7927bf53c6ff61e13d90e4410002cb8ea7ab32a2461b7025eeb19e631801"
       ],
-      "status": "filled",
+      "status": "won",
       "token_id": "85359326900765264538832647041057004371172192978060984100891837719760639793294",
       "current_price": 0.999,
       "unrealized_pnl": 4.407
@@ -246,7 +246,7 @@
         "0x0362c226dba3cb39016513d9bdc114b4011d95d8516b9a6fa7bd69fc18444c87",
         "0x2dc7aca65121374b5f5732d00f9e6600a613fc6b2c41d0c5fcbae4783593806f"
       ],
-      "status": "filled",
+      "status": "lost",
       "token_id": "70680997252637870845060297313707679888294694430159052880614680512560318175930",
       "current_price": 0.001,
       "unrealized_pnl": -17.253
