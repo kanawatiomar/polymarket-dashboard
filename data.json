@@ -1,8 +1,8 @@
 {
-  "updated": "2026-03-08T04:23:26.907224+00:00",
+  "updated": "2026-03-08T04:27:52.416834+00:00",
   "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
-  "usdc_balance": 6.6353,
-  "total_invested": 37.7423,
+  "usdc_balance": 6.4053,
+  "total_invested": 63.6023,
   "realized_pnl": 0,
   "open_orders": [
     {
@@ -84,13 +84,13 @@
       "signal": "Yes",
       "price": 0.046,
       "size": 65.2,
-      "filled": 0.0,
-      "remaining": 65.2,
+      "filled": 5.0,
+      "remaining": 60.2,
       "cost": 2.9992,
       "potential_payout": 65.2,
-      "filled_cost": 0.0,
-      "filled_payout": 0.0,
-      "fill_pct": 0.0,
+      "filled_cost": 0.23,
+      "filled_payout": 5.0,
+      "fill_pct": 7.7,
       "status": "live",
       "market_date": "2026-03-09",
       "token_id": "57811390198218385729739945574115066200270959579513350081008368281066931707447"
@@ -186,6 +186,46 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "91292678684465389346672483369427722609136547827631868623511258615182989629826"
+    }
+  ],
+  "ufc_bets": [
+    {
+      "fighter": "Caio Borralho",
+      "opponent": "Reinier de Ridder",
+      "event": "UFC 326",
+      "division": "Middleweight",
+      "card": "Main Card",
+      "question": "UFC 326: Reinier de Ridder vs. Caio Borralho (Middleweight, Main Card)",
+      "price": 0.66,
+      "shares": 13.0,
+      "cost": 8.58,
+      "potential_payout": 13.0,
+      "profit_if_win": 4.42,
+      "order_ids": [
+        "0x0af64456d129460cd15f51992c619da3eedcee419876d672199ac1c91925e6cf",
+        "0x56aa7927bf53c6ff61e13d90e4410002cb8ea7ab32a2461b7025eeb19e631801"
+      ],
+      "status": "filled",
+      "token_id": "85359326900765264538832647041057004371172192978060984100891837719760639793294"
+    },
+    {
+      "fighter": "Max Holloway",
+      "opponent": "Charles Oliveira",
+      "event": "UFC 326",
+      "division": "Lightweight",
+      "card": "Main Card",
+      "question": "UFC 326: Charles Oliveira vs. Max Holloway (Lightweight, Main Card)",
+      "price": 0.64,
+      "shares": 27.0,
+      "cost": 17.28,
+      "potential_payout": 27.0,
+      "profit_if_win": 9.72,
+      "order_ids": [
+        "0x0362c226dba3cb39016513d9bdc114b4011d95d8516b9a6fa7bd69fc18444c87",
+        "0x2dc7aca65121374b5f5732d00f9e6600a613fc6b2c41d0c5fcbae4783593806f"
+      ],
+      "status": "filled",
+      "token_id": "70680997252637870845060297313707679888294694430159052880614680512560318175930"
     }
   ]
 }
