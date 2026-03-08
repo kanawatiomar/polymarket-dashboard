@@ -1,10 +1,40 @@
 {
-  "updated": "2026-03-08T02:58:17.213011+00:00",
+  "updated": "2026-03-08T03:03:26.299216+00:00",
   "wallet": "0x85e8b5ec6d45acf6c1e17bcfbd262442ad59e12b",
-  "usdc_balance": 12.4541,
-  "total_invested": 10.569,
+  "usdc_balance": 58.7475,
+  "total_invested": 19.629,
   "realized_pnl": 0,
   "open_orders": [
+    {
+      "order_id": "0x0af64456d129460cd15f51992c619da3eedcee419876d672199ac1c91925e6cf",
+      "question": "UFC 326: Reinier de Ridder vs. Caio Borralho (Middleweight, Main Card)",
+      "signal": "Caio Borralho",
+      "price": 0.66,
+      "size": 5.0,
+      "filled": 0.0,
+      "remaining": 5.0,
+      "cost": 3.3,
+      "potential_payout": 5.0,
+      "status": "live",
+      "market_date": null,
+      "token_id": "85359326900765264538832647041057004371172192978060984100891837719760639793294",
+      "fill_pct": 0.0
+    },
+    {
+      "order_id": "0x0362c226dba3cb39016513d9bdc114b4011d95d8516b9a6fa7bd69fc18444c87",
+      "question": "UFC 326: Charles Oliveira vs. Max Holloway (Lightweight, Main Card)",
+      "signal": "Max Holloway",
+      "price": 0.64,
+      "size": 9.0,
+      "filled": 0.0,
+      "remaining": 9.0,
+      "cost": 5.76,
+      "potential_payout": 9.0,
+      "status": "live",
+      "market_date": null,
+      "token_id": "70680997252637870845060297313707679888294694430159052880614680512560318175930",
+      "fill_pct": 0.0
+    },
     {
       "order_id": "0x8eacc41c046feb7601d7bd8f8306e4ae11188b22b8f847ab6438ca36708b7d0f",
       "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
