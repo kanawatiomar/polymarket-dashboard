@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>POLY ARB · Live Positions</title>
+<title>POLY ARB · Live Positions v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -464,9 +464,9 @@
       <div class="section-title">Open Orders</div>
       <div id="open-cards"></div>
     </div>
-    <div class="section" id="filled-section" style="display:none">
+    <div class="section" id="filled-section">
       <div class="section-title">Filled / Resolved</div>
-      <div id="filled-cards"></div>
+      <div id="filled-cards"><div class="empty">LOADING...</div></div>
     </div>
   </div>
 
@@ -646,15 +646,13 @@ function render(d) {
 
   // Filled
   const filled = d.filled_positions || [];
-  const filledSection = document.getElementById('filled-section');
-  if (filled.length > 0) {
-    filledSection.style.display = 'block';
-    document.getElementById('filled-cards').innerHTML = filled.map(renderCard).join('');
-  }
+  document.getElementById('filled-cards').innerHTML = filled.length > 0
+    ? filled.map(renderCard).join('')
+    : '<div class="empty">NO FILLS YET</div>';
 
   // Summary bar
   const potentialPayout = open.reduce((s,p) => s + parseFloat(p.potential_payout || p.size || 0), 0);
-  document.getElementById('s-count').textContent = open.length;
+  document.getElementById('s-count').textContent = open.length + filled.length;
   document.getElementById('s-cost').textContent = fmt$(invested);
   document.getElementById('s-payout').textContent = fmt$(potentialPayout + invested);
 
