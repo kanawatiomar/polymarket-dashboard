@@ -1,8 +1,8 @@
 {
-  "updated": "2026-03-07T23:57:30.842575+00:00",
+  "updated": "2026-03-08T00:03:19.973670+00:00",
   "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
-  "usdc_balance": 18.1299,
-  "total_invested": 21.7808,
+  "usdc_balance": 17.5878,
+  "total_invested": 26.6003,
   "realized_pnl": 0,
   "open_orders": [
     {
@@ -11,7 +11,7 @@
       "signal": "YES",
       "price": 0.016,
       "size": 0.0,
-      "filled": 0.0,
+      "filled": 5.08,
       "cost": 0.0,
       "potential_payout": 0.0,
       "status": "live",
@@ -37,6 +37,28 @@
   "filled_positions": [
     {
       "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
+      "signal": "NO",
+      "price": 0.064,
+      "size": 7.2,
+      "cost": 0.4608,
+      "potential_payout": 7.2,
+      "status": "filled",
+      "market_date": "2026-03-08",
+      "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969"
+    },
+    {
+      "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
+      "signal": "YES",
+      "price": 0.984,
+      "size": 5.08,
+      "cost": 4.9987,
+      "potential_payout": 5.08,
+      "status": "filled",
+      "market_date": "2026-03-08",
+      "token_id": "111947966456906321822907707892284410772654093759193827009430181203596817699546"
+    },
+    {
+      "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
       "signal": "YES",
       "price": 0.936,
       "size": 18.3,
@@ -45,17 +67,6 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "30688434913363735219392421516922019860388788951123017211608504182175887426139"
-    },
-    {
-      "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
-      "signal": "NO",
-      "price": 0.064,
-      "size": 10.0,
-      "cost": 0.64,
-      "potential_payout": 10.0,
-      "status": "filled",
-      "market_date": "2026-03-08",
-      "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969"
     },
     {
       "question": "Will the highest temperature in Miami be between 84-85\u00b0F on March 8?",
