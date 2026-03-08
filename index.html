@@ -246,6 +246,68 @@
   .card-bar .pnl.neg { color: var(--red); }
   .card-bar .countdown { color: var(--amber); font-size: 10px; }
 
+  /* ── REWARD ROW ── */
+  .reward-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface2);
+    border: 1px solid rgba(0,255,136,0.18);
+    border-radius: 7px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .reward-cost {
+    background: rgba(255,179,0,0.10);
+    padding: 9px 12px;
+    text-align: center;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(0,255,136,0.12);
+  }
+  .reward-cost .rlabel { font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .reward-cost .rval   { font-size: 16px; color: var(--amber); font-family: 'Orbitron', monospace; font-weight: 700; margin-top: 2px; }
+
+  .reward-arrow {
+    font-size: 16px;
+    color: var(--text-dim);
+    padding: 0 10px;
+    flex-shrink: 0;
+  }
+
+  .reward-win {
+    background: rgba(0,255,136,0.07);
+    padding: 9px 12px;
+    text-align: center;
+    flex: 1;
+    border-left: 1px solid rgba(0,255,136,0.12);
+  }
+  .reward-win .rlabel { font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .reward-win .rval   { font-size: 16px; color: var(--green); font-family: 'Orbitron', monospace; font-weight: 700; margin-top: 2px; }
+
+  .reward-mult {
+    padding: 9px 12px;
+    text-align: center;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(0,255,136,0.12);
+  }
+  .reward-mult .rlabel { font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .reward-mult .rval   { font-size: 15px; color: var(--text-bright); font-family: 'Orbitron', monospace; font-weight: 700; margin-top: 2px; }
+
+  .reward-fill-track {
+    height: 3px;
+    background: rgba(0,255,136,0.08);
+    border-radius: 0 0 7px 7px;
+    overflow: hidden;
+    margin-top: -1px;
+  }
+  .reward-fill-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber), var(--green));
+    border-radius: 0 2px 2px 0;
+    transition: width 0.6s ease;
+  }
+
   /* ── SUMMARY ── */
   .summary {
     position: fixed;
@@ -447,13 +509,38 @@ function renderCard(pos) {
   const resolves = pos.resolves_at || (pos.market_date ? pos.market_date + 'T23:59:00Z' : null);
   const timer = countdown(resolves);
 
+  const mult      = cost > 0 ? (payout / cost) : 0;
+  const fillPct   = cost > 0 ? Math.min(100, (cost / payout) * 100) : 0;
+  const profit    = payout - cost;
+
   return `
     <div class="card ${st}">
       <div class="card-header">
         <div class="card-question">${pos.question || 'Unknown market'}</div>
         <div class="badge ${st}">${statusBadge(st)}</div>
       </div>
-      <div class="card-grid">
+
+      <!-- COST → REWARD banner -->
+      <div class="reward-row">
+        <div class="reward-cost">
+          <div class="rlabel">RISK</div>
+          <div class="rval">${fmt$(cost)}</div>
+        </div>
+        <div class="reward-arrow">→</div>
+        <div class="reward-win">
+          <div class="rlabel">WIN</div>
+          <div class="rval">${fmt$(payout)}</div>
+        </div>
+        <div class="reward-mult">
+          <div class="rlabel">PROFIT</div>
+          <div class="rval">${fmt$(profit)}</div>
+        </div>
+      </div>
+      <div class="reward-fill-track">
+        <div class="reward-fill-bar" style="width:${fillPct.toFixed(1)}%"></div>
+      </div>
+
+      <div class="card-grid" style="margin-top:10px">
         <div class="card-field">
           <div class="label">Signal</div>
           <div class="val ${signalClass}">BUY ${signal}</div>
@@ -463,22 +550,11 @@ function renderCard(pos) {
           <div class="val">${(price*100).toFixed(1)}¢</div>
         </div>
         <div class="card-field">
-          <div class="label">Shares</div>
-          <div class="val">${Math.round(size)}</div>
-        </div>
-        <div class="card-field">
-          <div class="label">Cost</div>
-          <div class="val">${fmt$(cost)}</div>
-        </div>
-        <div class="card-field">
-          <div class="label">Payout</div>
-          <div class="val green">${fmt$(payout)}</div>
-        </div>
-        <div class="card-field">
-          <div class="label">Edge</div>
-          <div class="val">${pos.edge ? (parseFloat(pos.edge)*100).toFixed(0)+'%' : '—'}</div>
+          <div class="label">Multiplier</div>
+          <div class="val green">${mult.toFixed(1)}x</div>
         </div>
       </div>
+
       <div class="card-bar">
         <span>${pos.market_date || '—'}</span>
         <span class="pnl ${pnlCls}">${fmtSign$(pnl)}</span>
