@@ -1,91 +1,48 @@
 {
-  "updated": "2026-03-08T02:48:35.367192+00:00",
-  "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
+  "updated": "2026-03-08T02:51:53.041635+00:00",
+  "wallet": "0x85e8b5ec6d45acf6c1e17bcfbd262442ad59e12b",
   "usdc_balance": 12.4541,
-  "total_invested": 319.0328,
+  "total_invested": 10.569,
   "realized_pnl": 0,
   "open_orders": [
     {
       "order_id": "0x8eacc41c046feb7601d7bd8f8306e4ae11188b22b8f847ab6438ca36708b7d0f",
       "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
-      "signal": "YES",
+      "signal": "Yes",
       "price": 0.016,
-      "size": 0.0,
+      "size": 242.4,
       "filled": 49.777687,
-      "cost": 0.0,
-      "potential_payout": 0.0,
+      "remaining": 192.62231300000002,
+      "cost": 3.8784,
+      "potential_payout": 242.4,
       "status": "live",
       "market_date": "2026-03-08",
-      "edge": null,
-      "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313"
+      "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313",
+      "fill_pct": 20.5
     }
   ],
   "filled_positions": [
     {
-      "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
-      "signal": "YES",
-      "price": 0.984,
-      "size": 3.770312,
-      "cost": 3.71,
-      "potential_payout": 3.77,
-      "status": "filled",
-      "market_date": "2026-03-08",
-      "token_id": "111947966456906321822907707892284410772654093759193827009430181203596817699546"
-    },
-    {
       "question": "Will the highest temperature in Toronto be 10\u00b0C or higher on March 8?",
-      "signal": "NO",
-      "price": 0.031,
-      "size": 164.6,
-      "cost": 5.1026,
-      "potential_payout": 164.6,
+      "signal": "No",
+      "price": 0.032,
+      "size": 123.1,
+      "cost": 3.9392,
+      "potential_payout": 123.1,
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "92779591599984128382137077564150071340567282117853030157887422197097013144677"
     },
     {
-      "question": "Will the highest temperature in Toronto be 10\u00b0C or higher on March 8?",
-      "signal": "YES",
-      "price": 0.962,
-      "size": 300.0,
-      "cost": 288.6,
-      "potential_payout": 300.0,
-      "status": "filled",
-      "market_date": "2026-03-08",
-      "token_id": "100423001261196432503659535201781274793519477570686886209191949989585354677596"
-    },
-    {
       "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
-      "signal": "NO",
+      "signal": "Yes",
       "price": 0.064,
-      "size": 7.49,
-      "cost": 0.4794,
-      "potential_payout": 7.49,
+      "size": 42.99,
+      "cost": 2.7514,
+      "potential_payout": 42.99,
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969"
-    },
-    {
-      "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
-      "signal": "YES",
-      "price": 0.936,
-      "size": 18.3,
-      "cost": 17.1288,
-      "potential_payout": 18.3,
-      "status": "filled",
-      "market_date": "2026-03-08",
-      "token_id": "30688434913363735219392421516922019860388788951123017211608504182175887426139"
-    },
-    {
-      "question": "Will the highest temperature in Miami be between 84-85\u00b0F on March 8?",
-      "signal": "YES",
-      "price": 0.59,
-      "size": 6.8,
-      "cost": 4.012,
-      "potential_payout": 6.8,
-      "status": "filled",
-      "market_date": "2026-03-08",
-      "token_id": "84523408181845963854368086208770577920218419684876378520249706569470808197607"
     }
   ]
 }
