@@ -82,5 +82,17 @@
     "label": "Max Holloway (2)",
     "category": "ufc",
     "fighter": "Max Holloway"
+  },
+  {
+    "order_id": "0x9fbf391cac5f2dac78512b70b085acd15acf699295a4531b4c78e20e6962cdc0",
+    "label": "Buenos Aires 23C YES (Mar9)",
+    "market_date": "2026-03-09",
+    "category": "weather"
+  },
+  {
+    "order_id": "0x0df9dd738a6614f651a5df583eb0291c52d8ac0561fe08adff0782797d4e903c",
+    "label": "Wellington 18C NO (Mar9)",
+    "market_date": "2026-03-09",
+    "category": "weather"
   }
 ]
