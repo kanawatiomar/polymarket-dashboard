@@ -1,12 +1,13 @@
 {
-  "updated": "2026-03-08T03:13:18.959282+00:00",
-  "wallet": "0x85e8b5ec6d45acf6c1e17bcfbd262442ad59e12b",
+  "updated": "2026-03-08T03:13:34.635060+00:00",
+  "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
   "usdc_balance": 12.9075,
-  "total_invested": 36.429,
+  "total_invested": 15.8296,
   "realized_pnl": 0,
   "open_orders": [
     {
       "order_id": "0x8eacc41c046feb7601d7bd8f8306e4ae11188b22b8f847ab6438ca36708b7d0f",
+      "label": "Seattle YES",
       "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
       "signal": "Yes",
       "price": 0.016,
@@ -15,56 +16,68 @@
       "remaining": 192.62231300000002,
       "cost": 3.8784,
       "potential_payout": 242.4,
+      "filled_cost": 0.7964,
+      "filled_payout": 49.78,
+      "fill_pct": 20.5,
       "status": "live",
       "market_date": "2026-03-08",
-      "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313",
-      "fill_pct": 20.5
+      "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313"
     }
   ],
   "filled_positions": [
     {
-      "question": "UFC 326: Reinier de Ridder vs. Caio Borralho (Middleweight, Main Card)",
-      "signal": "Caio Borralho",
-      "price": 0.66,
-      "size": 13.0,
-      "cost": 8.58,
-      "potential_payout": 13.0,
-      "status": "filled",
-      "market_date": null,
-      "token_id": "85359326900765264538832647041057004371172192978060984100891837719760639793294"
-    },
-    {
-      "question": "UFC 326: Charles Oliveira vs. Max Holloway (Lightweight, Main Card)",
-      "signal": "Max Holloway",
-      "price": 0.64,
-      "size": 27.0,
-      "cost": 17.28,
-      "potential_payout": 27.0,
-      "status": "filled",
-      "market_date": null,
-      "token_id": "70680997252637870845060297313707679888294694430159052880614680512560318175930"
-    },
-    {
+      "order_id": "0x72afcf355ea41d7ad8365c13e3d15671e250264aba7ed894d76ddb39a94af8e7",
+      "label": "Toronto NO",
       "question": "Will the highest temperature in Toronto be 10\u00b0C or higher on March 8?",
       "signal": "No",
       "price": 0.032,
       "size": 123.1,
+      "filled": 123.1,
+      "remaining": 0.0,
       "cost": 3.9392,
       "potential_payout": 123.1,
+      "filled_cost": 3.9392,
+      "filled_payout": 123.1,
+      "fill_pct": 100.0,
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "92779591599984128382137077564150071340567282117853030157887422197097013144677"
     },
     {
+      "order_id": "0x2cb4b63fa855642d11db69473fd918f245639f586817f62d9a0b7f817457a152",
+      "label": "Buenos Aires YES",
       "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
       "signal": "Yes",
       "price": 0.064,
-      "size": 42.99,
-      "cost": 2.7514,
-      "potential_payout": 42.99,
+      "size": 62.5,
+      "filled": 62.5,
+      "remaining": 0.0,
+      "cost": 4.0,
+      "potential_payout": 62.5,
+      "filled_cost": 4.0,
+      "filled_payout": 62.5,
+      "fill_pct": 100.0,
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969"
+    },
+    {
+      "order_id": "0x1d8eed54fabfee18e0639a75c2b55ae9cfdb1a9a6b41ed116ae33dda3bb1cff5",
+      "label": "Miami NO",
+      "question": "Will the highest temperature in Miami be between 84-85\u00b0F on March 8?",
+      "signal": "No",
+      "price": 0.59,
+      "size": 6.8,
+      "filled": 6.8,
+      "remaining": 0.0,
+      "cost": 4.012,
+      "potential_payout": 6.8,
+      "filled_cost": 4.012,
+      "filled_payout": 6.8,
+      "fill_pct": 100.0,
+      "status": "filled",
+      "market_date": "2026-03-08",
+      "token_id": "84523408181845963854368086208770577920218419684876378520249706569470808197607"
     }
   ]
 }
