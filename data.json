@@ -1,8 +1,8 @@
 {
-  "updated": "2026-03-08T00:03:19.973670+00:00",
+  "updated": "2026-03-08T00:08:20.713738+00:00",
   "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
-  "usdc_balance": 17.5878,
-  "total_invested": 26.6003,
+  "usdc_balance": 17.1085,
+  "total_invested": 26.6189,
   "realized_pnl": 0,
   "open_orders": [
     {
@@ -39,9 +39,9 @@
       "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
       "signal": "NO",
       "price": 0.064,
-      "size": 7.2,
-      "cost": 0.4608,
-      "potential_payout": 7.2,
+      "size": 7.49,
+      "cost": 0.4794,
+      "potential_payout": 7.49,
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969"
