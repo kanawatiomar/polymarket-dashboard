@@ -1,7 +1,7 @@
 {
-  "updated": "2026-03-08T03:38:25.591142+00:00",
+  "updated": "2026-03-08T03:43:24.062893+00:00",
   "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
-  "usdc_balance": 7.0533,
+  "usdc_balance": 6.6353,
   "total_invested": 37.7423,
   "realized_pnl": 0,
   "open_orders": [
@@ -66,13 +66,13 @@
       "signal": "Yes",
       "price": 0.022,
       "size": 177.8,
-      "filled": 0.0,
-      "remaining": 177.8,
+      "filled": 19.0,
+      "remaining": 158.8,
       "cost": 3.9116,
       "potential_payout": 177.8,
-      "filled_cost": 0.0,
-      "filled_payout": 0.0,
-      "fill_pct": 0.0,
+      "filled_cost": 0.418,
+      "filled_payout": 19.0,
+      "fill_pct": 10.7,
       "status": "live",
       "market_date": "2026-03-08",
       "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313"
