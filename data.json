@@ -1,32 +1,49 @@
 {
-  "updated": "2026-03-08T11:13:42.805855+00:00",
+  "updated": "2026-03-08T22:20:23.325639+00:00",
   "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
-  "usdc_balance": 23.2347,
-  "total_invested": 78.1061,
-  "realized_pnl": -6.0171,
-  "open_orders": [
+  "usdc_balance": 0.396,
+  "total_invested": 149.3931,
+  "realized_pnl": -23.3786,
+  "open_orders": [],
+  "filled_positions": [
     {
-      "order_id": "0x9fbf391cac5f2dac78512b70b085acd15acf699295a4531b4c78e20e6962cdc0",
       "token_id": "57811390198218385729739945574115066200270959579513350081008368281066931707447",
       "label": "Will the highest temperature in Buenos A",
       "question": "Will the highest temperature in Buenos Aires be 23\u00b0C or below on March 9?",
       "signal": "Yes",
-      "price": 0.012,
-      "size": 260.89,
-      "filled": 67.96725,
-      "remaining": 192.92274999999998,
-      "cost": 3.1307,
-      "potential_payout": 260.89,
-      "filled_cost": 0.8156,
-      "filled_payout": 67.97,
-      "fill_pct": 26.1,
+      "price": 0.0268,
+      "size": 1882.4685,
+      "filled": 1882.4685,
+      "remaining": 0,
+      "cost": 50.4502,
+      "potential_payout": 1882.47,
+      "filled_cost": 50.4502,
+      "filled_payout": 1882.47,
+      "fill_pct": 100.0,
       "status": "live",
       "market_date": "2026-03-09",
-      "current_price": 0.012,
+      "current_price": 0.031,
+      "unrealized_pnl": 7.9064
+    },
+    {
+      "token_id": "57087208617155638512036729905809608228676603203743904838922670388463891704339",
+      "label": "Will the highest temperature in Wellingt",
+      "question": "Will the highest temperature in Wellington be 16\u00b0C on March 9?",
+      "signal": "Yes",
+      "price": 0.001,
+      "size": 1592.59,
+      "filled": 1592.59,
+      "remaining": 0,
+      "cost": 1.5926,
+      "potential_payout": 1592.59,
+      "filled_cost": 1.5926,
+      "filled_payout": 1592.59,
+      "fill_pct": 100.0,
+      "status": "lost",
+      "market_date": "2026-03-09",
+      "current_price": 0.001,
       "unrealized_pnl": 0.0
-    }
-  ],
-  "filled_positions": [
+    },
     {
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969",
       "label": "Will the highest temperature in Buenos A",
@@ -41,10 +58,29 @@
       "filled_cost": 7.7809,
       "filled_payout": 144.09,
       "fill_pct": 100.0,
-      "status": "live",
+      "status": "lost",
       "market_date": "2026-03-08",
-      "current_price": 0.014,
-      "unrealized_pnl": -5.7636
+      "current_price": 0.001,
+      "unrealized_pnl": -7.6368
+    },
+    {
+      "token_id": "46761110356586820870194832991118088235449020853076141987052315117548766984690",
+      "label": "Will the highest temperature in Wellingt",
+      "question": "Will the highest temperature in Wellington be 18\u00b0C on March 9?",
+      "signal": "No",
+      "price": 0.1839,
+      "size": 137.0,
+      "filled": 137.0,
+      "remaining": 0,
+      "cost": 25.1943,
+      "potential_payout": 137.0,
+      "filled_cost": 25.1943,
+      "filled_payout": 137.0,
+      "fill_pct": 100.0,
+      "status": "live",
+      "market_date": "2026-03-09",
+      "current_price": 0.046,
+      "unrealized_pnl": -18.8923
     },
     {
       "token_id": "102567352026290085856628839104621665686409288517421932202708161660473204828313",
@@ -62,8 +98,8 @@
       "fill_pct": 100.0,
       "status": "lost",
       "market_date": "2026-03-08",
-      "current_price": 0.004,
-      "unrealized_pnl": -1.9896
+      "current_price": 0.001,
+      "unrealized_pnl": -2.3722
     },
     {
       "token_id": "92779591599984128382137077564150071340567282117853030157887422197097013144677",
@@ -81,8 +117,8 @@
       "fill_pct": 100.0,
       "status": "lost",
       "market_date": "2026-03-08",
-      "current_price": 0.003,
-      "unrealized_pnl": -3.5699
+      "current_price": 0.001,
+      "unrealized_pnl": -3.8161
     },
     {
       "token_id": "91292678684465389346672483369427722609136547827631868623511258615182989629826",
@@ -98,10 +134,10 @@
       "filled_cost": 3.976,
       "filled_payout": 7.1,
       "fill_pct": 100.0,
-      "status": "live",
+      "status": "lost",
       "market_date": "2026-03-08",
-      "current_price": 0.56,
-      "unrealized_pnl": 0.0
+      "current_price": 0.002,
+      "unrealized_pnl": -3.9618
     },
     {
       "token_id": "84523408181845963854368086208770577920218419684876378520249706569470808197607",
@@ -117,29 +153,10 @@
       "filled_cost": 4.012,
       "filled_payout": 6.8,
       "fill_pct": 100.0,
-      "status": "live",
+      "status": "lost",
       "market_date": "2026-03-08",
-      "current_price": 0.63,
-      "unrealized_pnl": 0.272
-    },
-    {
-      "token_id": "46761110356586820870194832991118088235449020853076141987052315117548766984690",
-      "label": "Will the highest temperature in Wellingt",
-      "question": "Will the highest temperature in Wellington be 18\u00b0C on March 9?",
-      "signal": "No",
-      "price": 0.4699,
-      "size": 6.0,
-      "filled": 6.0,
-      "remaining": 0,
-      "cost": 2.8194,
-      "potential_payout": 6.0,
-      "filled_cost": 2.8194,
-      "filled_payout": 6.0,
-      "fill_pct": 100.0,
-      "status": "live",
-      "market_date": "2026-03-09",
-      "current_price": 0.11,
-      "unrealized_pnl": -2.1594
+      "current_price": 0.002,
+      "unrealized_pnl": -3.9984
     },
     {
       "token_id": "68699440492662790716720082755084353712091703118090689302912001070304436603305",
