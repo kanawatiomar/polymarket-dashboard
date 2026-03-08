@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>POLY ARB · Live Positions v2</title>
+<title>POLY ARB · Weather + UFC Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -418,6 +418,125 @@
     .logo { font-size: 18px; }
     .card-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ── UFC SECTION ── */
+  :root {
+    --ufc: #ff6b35;
+    --ufc-dim: rgba(255,107,53,0.12);
+    --ufc-border: rgba(255,107,53,0.25);
+    --ufc-glow: rgba(255,107,53,0.3);
+  }
+
+  .section-title.ufc-title { color: var(--ufc); }
+  .section-title.ufc-title::after { background: var(--ufc-border); }
+
+  .ufc-card {
+    background: var(--surface);
+    border: 1px solid var(--ufc-border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ufc-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 10px 0 0 10px;
+    background: var(--ufc);
+    box-shadow: 0 0 8px var(--ufc-glow);
+  }
+
+  .ufc-card.won::before { background: var(--green); box-shadow: 0 0 8px rgba(0,255,136,0.4); }
+  .ufc-card.lost::before { background: var(--red); box-shadow: none; }
+
+  .ufc-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 6px;
+  }
+
+  .ufc-event-tag {
+    font-size: 9px;
+    color: var(--ufc);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .ufc-division {
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .badge.ufc-live   { background: var(--ufc-dim); color: var(--ufc); border: 1px solid var(--ufc-border); }
+  .badge.ufc-filled { background: rgba(77,184,255,0.12); color: var(--blue); border: 1px solid rgba(77,184,255,0.3); }
+  .badge.ufc-won    { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.4); }
+  .badge.ufc-lost   { background: rgba(255,69,69,0.12); color: var(--red); border: 1px solid rgba(255,69,69,0.3); }
+
+  .ufc-matchup {
+    margin-bottom: 10px;
+  }
+
+  .ufc-opponent {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  .ufc-opponent span { color: var(--text); }
+
+  .ufc-fighter-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ufc);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px var(--ufc-glow);
+    line-height: 1.1;
+  }
+
+  .ufc-fighter-name.won  { color: var(--green); text-shadow: 0 0 12px rgba(0,255,136,0.3); }
+  .ufc-fighter-name.lost { color: var(--red); text-shadow: none; }
+
+  .ufc-reward-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface2);
+    border: 1px solid var(--ufc-border);
+    border-radius: 7px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .ufc-reward-row .reward-cost { background: rgba(255,107,53,0.08); }
+  .ufc-reward-row .reward-cost .rval { color: var(--ufc); }
+  .ufc-reward-row .reward-win  { background: rgba(0,255,136,0.05); }
+
+  .ufc-odds-bar {
+    background: var(--surface2);
+    border: 1px solid var(--ufc-border);
+    border-radius: 4px;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .ufc-odds-bar .odds-val { color: var(--ufc); }
+  .ufc-odds-bar .mult-val { color: var(--text-bright); }
+  .ufc-odds-bar .shares   { color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -427,7 +546,7 @@
     <div class="header-top">
       <div class="logo">
         POLY ARB
-        <span>WEATHER ARBITRAGE TERMINAL</span>
+        <span>WEATHER ARB + UFC BETS</span>
       </div>
       <div class="refresh-pill">
         <div class="pulse-dot" id="pulse"></div>
@@ -460,12 +579,16 @@
   </div>
 
   <div id="main" style="display:none">
+    <div class="section" id="ufc-section">
+      <div class="section-title ufc-title">UFC Bets</div>
+      <div id="ufc-cards"><div class="empty">LOADING...</div></div>
+    </div>
     <div class="section" id="open-section">
-      <div class="section-title">Open Orders</div>
+      <div class="section-title">Weather — Open Orders</div>
       <div id="open-cards"></div>
     </div>
     <div class="section" id="filled-section">
-      <div class="section-title">Filled / Resolved</div>
+      <div class="section-title">Weather — Filled / Resolved</div>
       <div id="filled-cards"><div class="empty">LOADING...</div></div>
     </div>
   </div>
@@ -518,6 +641,61 @@ function statusBadge(status) {
     filled: 'FILLED', won: 'WON ✓', lost: 'LOST ✗', cancelled: 'CANCELLED'
   };
   return map[status] || status.toUpperCase();
+}
+
+function renderUFCCard(bet) {
+  const st = (bet.status || 'filled').toLowerCase();
+  const badgeClass = st === 'live' ? 'ufc-live' : st === 'won' ? 'ufc-won' : st === 'lost' ? 'ufc-lost' : 'ufc-filled';
+  const badgeText  = st === 'live' ? 'LIVE' : st === 'won' ? 'WON' : st === 'lost' ? 'LOST' : 'FILLED';
+  const nameClass  = st === 'won' ? 'won' : st === 'lost' ? 'lost' : '';
+
+  const cost    = parseFloat(bet.cost || 0);
+  const payout  = parseFloat(bet.potential_payout || bet.shares || 0);
+  const profit  = payout - cost;
+  const price   = parseFloat(bet.price || 0);
+  const mult    = cost > 0 ? (payout / cost) : 0;
+
+  const division = bet.division ? bet.division.toUpperCase() : '';
+  const card     = bet.card     ? bet.card.toUpperCase()     : '';
+  const divLabel = [division, card].filter(Boolean).join(' \u00B7 ');
+
+  return `
+    <div class="ufc-card ${st}">
+      <div class="ufc-meta">
+        <div>
+          <div class="ufc-event-tag">${bet.event || 'UFC'}</div>
+          ${divLabel ? `<div class="ufc-division">${divLabel}</div>` : ''}
+        </div>
+        <div class="badge ${badgeClass}">${badgeText}</div>
+      </div>
+
+      <div class="ufc-matchup">
+        <div class="ufc-opponent">vs <span>${bet.opponent || '—'}</span></div>
+        <div class="ufc-fighter-name ${nameClass}">${bet.fighter}</div>
+      </div>
+
+      <div class="ufc-reward-row reward-row">
+        <div class="reward-cost">
+          <div class="rlabel">RISK</div>
+          <div class="rval">${fmt$(cost)}</div>
+        </div>
+        <div class="reward-arrow">&rarr;</div>
+        <div class="reward-win">
+          <div class="rlabel">WIN</div>
+          <div class="rval">${fmt$(payout)}</div>
+        </div>
+        <div class="reward-mult">
+          <div class="rlabel">PROFIT</div>
+          <div class="rval">${fmt$(profit)}</div>
+        </div>
+      </div>
+
+      <div class="ufc-odds-bar">
+        <span class="odds-val">BUY @ ${(price * 100).toFixed(0)}% implied</span>
+        <span class="shares">${bet.shares} shares</span>
+        <span class="mult-val">${mult.toFixed(2)}x</span>
+      </div>
+    </div>`;
 }
 
 function renderCard(pos) {
@@ -622,7 +800,9 @@ function render(d) {
   document.getElementById('h-balance').textContent = fmt$(d.usdc_balance);
 
   const allPos = [...(d.open_orders || []), ...(d.filled_positions || [])];
-  const invested = allPos.reduce((s,p) => s + parseFloat(p.cost || 0), 0);
+  const weatherInvested = allPos.reduce((s,p) => s + parseFloat(p.cost || 0), 0);
+  const ufcTotalCost = (d.ufc_bets || []).reduce((s,b) => s + parseFloat(b.cost || 0), 0);
+  const invested = weatherInvested + ufcTotalCost;
   const realizedPnl = (d.filled_positions || []).reduce((s,p) => {
     const st = p.status;
     const cost = parseFloat(p.cost || 0);
@@ -635,9 +815,14 @@ function render(d) {
   pnlEl.textContent = fmtSign$(realizedPnl);
   pnlEl.className = 'value ' + (realizedPnl >= 0 ? 'green' : 'red');
 
+  // UFC bets
+  const ufcBets = d.ufc_bets || [];
+  document.getElementById('ufc-cards').innerHTML = ufcBets.length > 0
+    ? ufcBets.map(renderUFCCard).join('')
+    : '<div class="empty">NO UFC BETS</div>';
+
   // Open orders
   const open = d.open_orders || [];
-  const openSection = document.getElementById('open-section');
   if (open.length === 0) {
     document.getElementById('open-cards').innerHTML = '<div class="empty">NO OPEN ORDERS</div>';
   } else {
@@ -650,11 +835,14 @@ function render(d) {
     ? filled.map(renderCard).join('')
     : '<div class="empty">NO FILLS YET</div>';
 
-  // Summary bar
-  const potentialPayout = open.reduce((s,p) => s + parseFloat(p.potential_payout || p.size || 0), 0);
-  document.getElementById('s-count').textContent = open.length + filled.length;
-  document.getElementById('s-cost').textContent = fmt$(invested);
-  document.getElementById('s-payout').textContent = fmt$(potentialPayout + invested);
+  // Summary bar — include UFC in totals
+  const ufcInvested = ufcBets.reduce((s,b) => s + parseFloat(b.cost || 0), 0);
+  const ufcPayout   = ufcBets.reduce((s,b) => s + parseFloat(b.potential_payout || 0), 0);
+  const weatherPayout = open.reduce((s,p) => s + parseFloat(p.potential_payout || p.size || 0), 0);
+  const totalPositions = open.length + filled.length + ufcBets.length;
+  document.getElementById('s-count').textContent = totalPositions;
+  document.getElementById('s-cost').textContent = fmt$(invested + ufcInvested);
+  document.getElementById('s-payout').textContent = fmt$(weatherPayout + ufcPayout);
 
   const totalPnl = realizedPnl;
   const sPnl = document.getElementById('s-pnl');

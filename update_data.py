@@ -1,16 +1,17 @@
 """
 update_data.py — Fetches live Polymarket positions and writes data.json.
-Run by cron every 5 minutes; auto-commits and pushes to GitHub Pages.
+Uses our_orders.json as source of truth — looks up each order by ID directly.
+Handles both weather arb positions and UFC bets (grouped by fighter).
 """
-import json, subprocess, sys, os, httpx
+import json, subprocess, os, httpx, re
 from pathlib import Path
 from datetime import datetime, timezone
+from collections import defaultdict
 
-# --- Config ---
-BASE      = Path(__file__).parent
-POLY_DIR  = BASE.parent / "poly-weather-arb"
-CREDS     = POLY_DIR / "creds.json"
-ENV_FILE  = POLY_DIR / ".env"
+BASE     = Path(__file__).parent
+POLY_DIR = BASE.parent / "poly-weather-arb"
+CREDS    = POLY_DIR / "creds.json"
+ENV_FILE = POLY_DIR / ".env"
 
 def load_env():
     env = {}
@@ -21,19 +22,18 @@ def load_env():
                 env[k.strip()] = v.strip().strip('"').strip("'")
     return env
 
-env = load_env()
-PRIVATE_KEY = env.get("POLY_PRIVATE_KEY","")
-WALLET_ADDR = env.get("POLY_ADDRESS","")
+env         = load_env()
+PRIVATE_KEY = env.get("POLY_PRIVATE_KEY", "")
+WALLET_ADDR = env.get("POLY_ADDRESS", "")
 
-# --- Patch httpx (NordVPN handles routing, no proxy needed) ---
 import py_clob_client.http_helpers.helpers as http_helpers
 http_helpers._http_client = httpx.Client(http2=True, timeout=30, verify=False)
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
 
-creds_data  = json.loads(CREDS.read_text())
-api_creds   = ApiCreds(
+creds_data = json.loads(CREDS.read_text())
+api_creds  = ApiCreds(
     api_key=creds_data["apiKey"],
     api_secret=creds_data["secret"],
     api_passphrase=creds_data["passphrase"],
@@ -43,103 +43,20 @@ client = ClobClient(
     key=PRIVATE_KEY, chain_id=137, creds=api_creds, signature_type=0,
 )
 
-def get_balance():
-    try:
-        result = client.get_balance_allowance(
-            params=BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
-        )
-        bal = int(result.get("balance", 0))
-        return bal / 1e6
-    except Exception as e:
-        print(f"Balance error: {e}")
-        return 0.0
-
-def get_open_orders():
-    try:
-        raw = client.get_orders()
-        if not isinstance(raw, list):
-            raw = []
-        orders = []
-        for o in raw:
-            price  = float(o.get("price",  0))
-            size   = float(o.get("size",   0))
-            filled = float(o.get("size_matched", 0))
-            status = o.get("status", "live").lower()
-            if status in ("cancelled","canceled","expired"):
-                continue
-            side = o.get("side","BUY").upper()
-            signal = "YES" if side == "BUY" else "NO"
-            # Try to get question from asset_id via Gamma
-            token_id = o.get("asset_id","")
-            question = fetch_question(token_id)
-            market_date = extract_date(question)
-            orders.append({
-                "order_id": o.get("id",""),
-                "question": question,
-                "signal": signal,
-                "price": price,
-                "size": size,
-                "filled": filled,
-                "cost": round(price * size, 4),
-                "potential_payout": round(size, 2),
-                "status": status,
-                "market_date": market_date,
-                "edge": None,
-                "token_id": token_id,
-            })
-        return orders
-    except Exception as e:
-        print(f"Orders error: {e}")
-        return []
-
-def get_filled_trades():
-    try:
-        raw = client.get_trades()
-        if not isinstance(raw, list):
-            raw = []
-        seen = {}
-        for t in raw:
-            asset = t.get("asset_id","")
-            if asset not in seen:
-                seen[asset] = {
-                    "token_id": asset,
-                    "question": fetch_question(asset),
-                    "side": t.get("side","BUY"),
-                    "price": float(t.get("price",0)),
-                    "size": float(t.get("size",0)),
-                    "status": "filled",
-                }
-        filled = []
-        for asset, pos in seen.items():
-            signal = "YES" if pos["side"].upper() == "BUY" else "NO"
-            cost = round(pos["price"] * pos["size"], 4)
-            market_date = extract_date(pos["question"])
-            filled.append({
-                "question": pos["question"],
-                "signal": signal,
-                "price": pos["price"],
-                "size": pos["size"],
-                "cost": cost,
-                "potential_payout": round(pos["size"], 2),
-                "status": "filled",
-                "market_date": market_date,
-                "token_id": asset,
-            })
-        return filled
-    except Exception as e:
-        print(f"Trades error: {e}")
-        return []
+# ─── Helpers ────────────────────────────────────────────────────────────────
 
 _q_cache = {}
 def fetch_question(token_id):
     if not token_id or token_id in _q_cache:
-        return _q_cache.get(token_id, "Loading...")
+        return _q_cache.get(token_id, "Unknown market")
     try:
-        url = f"https://gamma-api.polymarket.com/markets?clob_token_ids={token_id}"
-        r = httpx.get(url, timeout=8)
+        r = httpx.get(
+            f"https://gamma-api.polymarket.com/markets?clob_token_ids={token_id}",
+            timeout=8
+        )
         data = r.json()
         if isinstance(data, list) and data:
-            q = data[0].get("question","Unknown market")
+            q = data[0].get("question", "Unknown market")
             _q_cache[token_id] = q
             return q
     except:
@@ -148,58 +65,245 @@ def fetch_question(token_id):
     return "Unknown market"
 
 def extract_date(question):
-    import re
-    m = re.search(r'(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2})', question or "")
+    m = re.search(
+        r'(January|February|March|April|May|June|July|August|September'
+        r'|October|November|December)\s+(\d{1,2})',
+        question or ""
+    )
     if not m:
         return None
-    month_map = {v:str(i).zfill(2) for i,v in enumerate(
-        ['January','February','March','April','May','June',
-         'July','August','September','October','November','December'], 1)}
-    mo = month_map[m.group(1)]
-    day = m.group(2).zfill(2)
-    yr = "2026"
-    return f"{yr}-{mo}-{day}"
+    months = ['January','February','March','April','May','June',
+              'July','August','September','October','November','December']
+    mo = str(months.index(m.group(1)) + 1).zfill(2)
+    return f"2026-{mo}-{m.group(2).zfill(2)}"
+
+def parse_ufc_question(question):
+    """Extract event, fighter1, fighter2, division, card from UFC market title."""
+    # e.g. "UFC 326: Reinier de Ridder vs. Caio Borralho (Middleweight, Main Card)"
+    result = {"event": "UFC", "fighter1": "", "fighter2": "", "division": "", "card": ""}
+    if not question:
+        return result
+    # Event (UFC NNN)
+    em = re.match(r'(UFC\s+\d+)', question)
+    if em:
+        result["event"] = em.group(1)
+    # Fighters: "X vs. Y" or "X vs Y"
+    fm = re.search(r':\s+(.+?)\s+vs\.?\s+(.+?)(?:\s*\(|$)', question)
+    if fm:
+        result["fighter1"] = fm.group(1).strip()
+        result["fighter2"] = fm.group(2).strip()
+    # Division and card type
+    pm = re.search(r'\(([^,]+),\s*([^)]+)\)', question)
+    if pm:
+        result["division"] = pm.group(1).strip()
+        result["card"]     = pm.group(2).strip()
+    return result
+
+def get_balance():
+    try:
+        result = client.get_balance_allowance(
+            params=BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
+        )
+        return int(result.get("balance", 0)) / 1e6
+    except Exception as e:
+        print(f"Balance error: {e}")
+        return 0.0
+
+def build_position(order_id, label=None):
+    """Fetch a single weather order by ID and return a position dict."""
+    try:
+        o = client.get_order(order_id)
+    except Exception as e:
+        print(f"  Error fetching {order_id[:12]}: {e}")
+        return None
+
+    status        = o.get("status", "").upper()
+    original_size = float(o.get("original_size") or 0)
+    size_matched  = float(o.get("size_matched")  or 0)
+    remaining     = max(0.0, original_size - size_matched)
+    price         = float(o.get("price") or 0)
+    token_id      = o.get("asset_id", "")
+    outcome       = o.get("outcome", "Yes")
+
+    question    = fetch_question(token_id)
+    market_date = extract_date(question)
+
+    filled_cost   = round(size_matched * price, 4)
+    filled_payout = round(size_matched, 2)
+    total_cost    = round(original_size * price, 4)
+    total_payout  = round(original_size, 2)
+
+    return {
+        "order_id"         : order_id,
+        "label"            : label or question[:40],
+        "question"         : question,
+        "signal"           : outcome,
+        "price"            : price,
+        "size"             : original_size,
+        "filled"           : size_matched,
+        "remaining"        : remaining,
+        "cost"             : total_cost,
+        "potential_payout" : total_payout,
+        "filled_cost"      : filled_cost,
+        "filled_payout"    : filled_payout,
+        "fill_pct"         : round(size_matched / original_size * 100, 1) if original_size else 0,
+        "status"           : "live" if status == "LIVE" else "filled" if status == "MATCHED" else status.lower(),
+        "market_date"      : market_date,
+        "token_id"         : token_id,
+    }
+
+def build_ufc_bet(fighter_name, order_ids):
+    """Aggregate multiple orders for one UFC fighter into a single bet card."""
+    total_shares = 0.0
+    total_cost   = 0.0
+    status       = "filled"
+    question     = ""
+    token_id     = ""
+
+    for oid in order_ids:
+        try:
+            o = client.get_order(oid)
+        except Exception as e:
+            print(f"  Error fetching UFC order {oid[:12]}: {e}")
+            continue
+
+        o_status = o.get("status", "").upper()
+        if o_status == "LIVE":
+            status = "live"
+        elif o_status == "CANCELED" and status != "live":
+            status = "cancelled"
+
+        matched  = float(o.get("size_matched") or 0)
+        price    = float(o.get("price") or 0)
+        total_shares += matched
+        total_cost   += matched * price
+
+        if not token_id:
+            token_id = o.get("asset_id", "")
+        if not question:
+            question = fetch_question(token_id)
+
+    if total_shares == 0:
+        return None
+
+    avg_price = total_cost / total_shares if total_shares else 0
+    meta = parse_ufc_question(question)
+
+    # Determine opponent
+    f1, f2 = meta["fighter1"], meta["fighter2"]
+    # Which fighter is "ours"? Match by last name fragment
+    fighter_last = fighter_name.split()[-1].lower()
+    if fighter_last in f1.lower():
+        opponent = f2
+    elif fighter_last in f2.lower():
+        opponent = f1
+    else:
+        # fallback: use outcome field from last order
+        opponent = f1 if fighter_name != f1 else f2
+
+    return {
+        "fighter"          : fighter_name,
+        "opponent"         : opponent,
+        "event"            : meta["event"],
+        "division"         : meta["division"],
+        "card"             : meta["card"],
+        "question"         : question,
+        "price"            : round(avg_price, 4),
+        "shares"           : round(total_shares, 2),
+        "cost"             : round(total_cost, 4),
+        "potential_payout" : round(total_shares, 2),
+        "profit_if_win"    : round(total_shares - total_cost, 4),
+        "order_ids"        : order_ids,
+        "status"           : status,
+        "token_id"         : token_id,
+    }
 
 def git_push():
     try:
         os.chdir(BASE)
-        subprocess.run(["git","add","data.json"], check=True)
-        subprocess.run(["git","commit","-m","auto: update positions"], check=True)
-        subprocess.run(["git","push"], check=True)
+        subprocess.run(["git", "add", "data.json"], check=True)
+        subprocess.run(["git", "commit", "-m", "auto: update positions"], check=True)
+        subprocess.run(["git", "push"], check=True)
         print("Pushed to GitHub.")
     except subprocess.CalledProcessError as e:
-        print(f"Git error: {e}")
+        print(f"Git: {e}")
 
 def main():
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Updating dashboard...")
 
-    balance   = get_balance()
-    open_ord  = get_open_orders()
-    filled    = get_filled_trades()
+    orders_file = BASE / "our_orders.json"
+    if not orders_file.exists():
+        print("ERROR: our_orders.json not found")
+        return
 
-    # Merge: if an open order is also in filled trades, move to filled
-    filled_tokens = {f["token_id"] for f in filled}
-    open_ord = [o for o in open_ord if o["token_id"] not in filled_tokens]
+    our_orders = json.loads(orders_file.read_text())
+    balance    = get_balance()
 
-    invested = sum(o["cost"] for o in open_ord) + sum(f["cost"] for f in filled)
-    pnl = sum(
-        (f["potential_payout"] - f["cost"] if f["status"] == "won" else -f["cost"] if f["status"] == "lost" else 0)
-        for f in filled
+    # Separate weather vs UFC orders
+    weather_orders = [o for o in our_orders if o.get("category", "weather") == "weather"]
+    ufc_orders_raw = [o for o in our_orders if o.get("category") == "ufc"]
+
+    # ── Weather positions ────────────────────────────────────────────────
+    open_orders      = []
+    filled_positions = []
+
+    for entry in weather_orders:
+        oid   = entry["order_id"]
+        label = entry.get("label", "")
+        print(f"  Fetching weather: {label} ({oid[:12]}...)")
+        pos = build_position(oid, label)
+        if not pos:
+            continue
+        if pos["status"] == "live":
+            open_orders.append(pos)
+        else:
+            filled_positions.append(pos)
+
+    # ── UFC bets ─────────────────────────────────────────────────────────
+    # Group by fighter
+    ufc_by_fighter = defaultdict(list)
+    for entry in ufc_orders_raw:
+        fighter = entry.get("fighter", entry.get("label", "Unknown"))
+        ufc_by_fighter[fighter].append(entry["order_id"])
+
+    ufc_bets = []
+    for fighter, order_ids in ufc_by_fighter.items():
+        print(f"  Fetching UFC: {fighter} ({len(order_ids)} orders)")
+        bet = build_ufc_bet(fighter, order_ids)
+        if bet:
+            ufc_bets.append(bet)
+
+    # ── Totals ────────────────────────────────────────────────────────────
+    weather_invested = sum(p["cost"] for p in open_orders + filled_positions)
+    ufc_invested     = sum(b["cost"] for b in ufc_bets)
+    total_invested   = weather_invested + ufc_invested
+
+    realized_pnl = sum(
+        (p["filled_payout"] - p["filled_cost"] if p.get("status") == "won"
+         else -p["filled_cost"] if p.get("status") == "lost" else 0)
+        for p in filled_positions
+    ) + sum(
+        (b["profit_if_win"] if b.get("status") == "won"
+         else -b["cost"] if b.get("status") == "lost" else 0)
+        for b in ufc_bets
     )
 
     output = {
         "updated"          : datetime.now(timezone.utc).isoformat(),
         "wallet"           : WALLET_ADDR,
         "usdc_balance"     : round(balance, 4),
-        "total_invested"   : round(invested, 4),
-        "realized_pnl"     : round(pnl, 4),
-        "open_orders"      : open_ord,
-        "filled_positions" : filled,
+        "total_invested"   : round(total_invested, 4),
+        "realized_pnl"     : round(realized_pnl, 4),
+        "open_orders"      : open_orders,
+        "filled_positions" : filled_positions,
+        "ufc_bets"         : ufc_bets,
     }
 
-    out_path = BASE / "data.json"
-    out_path.write_text(json.dumps(output, indent=2))
-    print(f"Written {out_path} — {len(open_ord)} open, {len(filled)} filled, balance ${balance:.2f}")
+    (BASE / "data.json").write_text(json.dumps(output, indent=2))
+    print(
+        f"Written — {len(open_orders)} open, {len(filled_positions)} filled, "
+        f"{len(ufc_bets)} UFC bets | balance ${balance:.2f} | invested ${total_invested:.2f}"
+    )
 
     git_push()
 
