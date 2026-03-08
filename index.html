@@ -537,6 +537,8 @@
   .ufc-odds-bar .odds-val { color: var(--ufc); }
   .ufc-odds-bar .mult-val { color: var(--text-bright); }
   .ufc-odds-bar .shares   { color: var(--text-dim); }
+  .ufc-odds-bar .pnl.pos  { color: var(--green); }
+  .ufc-odds-bar .pnl.neg  { color: var(--red); }
 </style>
 </head>
 <body>
@@ -691,9 +693,9 @@ function renderUFCCard(bet) {
       </div>
 
       <div class="ufc-odds-bar">
-        <span class="odds-val">BUY @ ${(price * 100).toFixed(0)}% implied</span>
+        <span class="odds-val">BUY @ ${(price * 100).toFixed(0)}% → ${bet.current_price != null ? (parseFloat(bet.current_price)*100).toFixed(0)+'%' : '—'}</span>
         <span class="shares">${bet.shares} shares</span>
-        <span class="mult-val">${mult.toFixed(2)}x</span>
+        ${bet.unrealized_pnl != null ? `<span class="mult-val ${parseFloat(bet.unrealized_pnl) >= 0 ? 'pnl pos' : 'pnl neg'}">${fmtSign$(bet.unrealized_pnl)}</span>` : `<span class="mult-val">${mult.toFixed(2)}x</span>`}
       </div>
     </div>`;
 }
@@ -705,11 +707,18 @@ function renderCard(pos) {
 
   const price   = parseFloat(pos.price || 0);
   const size    = parseFloat(pos.size  || 0);
+  const filled  = parseFloat(pos.filled || 0);
   const cost    = parseFloat(pos.cost  || price * size);
   const payout  = parseFloat(pos.potential_payout || size);
-  const curPx   = parseFloat(pos.current_price || price);
-  const pnl     = (st === 'won') ? payout - cost : (st === 'lost') ? -cost : (curPx - price) * size;
+  const curPx   = pos.current_price != null ? parseFloat(pos.current_price) : null;
+  // P&L: use unrealized_pnl from data if available, else calculate from filled shares
+  const pnl     = (st === 'won') ? payout - cost
+                : (st === 'lost') ? -cost
+                : (pos.unrealized_pnl != null) ? parseFloat(pos.unrealized_pnl)
+                : (curPx != null && filled > 0) ? (curPx - price) * filled
+                : 0;
   const pnlCls  = pnl >= 0 ? 'pos' : 'neg';
+  const hasPnl  = curPx != null && filled > 0 && st !== 'won' && st !== 'lost';
 
   const resolves = pos.resolves_at || (pos.market_date ? pos.market_date + 'T23:59:00Z' : null);
   const timer = countdown(resolves);
@@ -773,15 +782,20 @@ function renderCard(pos) {
           <div class="label">Entry</div>
           <div class="val">${(price*100).toFixed(1)}¢</div>
         </div>
+        ${hasPnl ? `
+        <div class="card-field">
+          <div class="label">Now</div>
+          <div class="val ${pnl >= 0 ? 'buy-yes' : 'buy-no'}">${(curPx*100).toFixed(1)}¢</div>
+        </div>` : `
         <div class="card-field">
           <div class="label">Multiplier</div>
           <div class="val green">${mult.toFixed(1)}x</div>
-        </div>
+        </div>`}
       </div>
 
       <div class="card-bar">
         <span>${pos.market_date || '—'}</span>
-        <span class="pnl ${pnlCls}">${fmtSign$(pnl)}</span>
+        <span class="pnl ${pnlCls}">${hasPnl || st === 'won' || st === 'lost' ? fmtSign$(pnl) : '—'}</span>
         <span class="countdown">${timer === 'RESOLVED' ? '✓ RESOLVED' : 'closes in ' + timer}</span>
       </div>
     </div>`;
@@ -811,9 +825,17 @@ function render(d) {
   }, 0);
 
   document.getElementById('h-invested').textContent = fmt$(invested);
+
+  // Unrealized P&L across all open positions + UFC bets
+  const unrealizedWeather = (d.open_orders || []).reduce((s,p) =>
+    s + (p.unrealized_pnl != null ? parseFloat(p.unrealized_pnl) : 0), 0);
+  const unrealizedUFC = (d.ufc_bets || []).reduce((s,b) =>
+    s + (b.unrealized_pnl != null ? parseFloat(b.unrealized_pnl) : 0), 0);
+  const totalPnlDisplay = realizedPnl + unrealizedWeather + unrealizedUFC;
+
   const pnlEl = document.getElementById('h-pnl');
-  pnlEl.textContent = fmtSign$(realizedPnl);
-  pnlEl.className = 'value ' + (realizedPnl >= 0 ? 'green' : 'red');
+  pnlEl.textContent = fmtSign$(totalPnlDisplay);
+  pnlEl.className = 'value ' + (totalPnlDisplay >= 0 ? 'green' : 'red');
 
   // UFC bets
   const ufcBets = d.ufc_bets || [];

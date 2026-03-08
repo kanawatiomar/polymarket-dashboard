@@ -45,6 +45,40 @@ client = ClobClient(
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
+_price_cache = {}
+def fetch_current_price(token_id):
+    """Fetch the latest mid/last-trade price for a token from Polymarket CLOB."""
+    if not token_id:
+        return None
+    if token_id in _price_cache:
+        return _price_cache[token_id]
+    try:
+        r = httpx.get(
+            f"https://clob.polymarket.com/last-trade-price?token_id={token_id}",
+            timeout=6
+        )
+        data = r.json()
+        price = float(data.get("price", 0))
+        if price > 0:
+            _price_cache[token_id] = price
+            return price
+    except:
+        pass
+    # Fallback: try midpoint from orderbook
+    try:
+        r = httpx.get(
+            f"https://clob.polymarket.com/midpoint?token_id={token_id}",
+            timeout=6
+        )
+        data = r.json()
+        price = float(data.get("mid", 0))
+        if price > 0:
+            _price_cache[token_id] = price
+            return price
+    except:
+        pass
+    return None
+
 _q_cache = {}
 def fetch_question(token_id):
     if not token_id or token_id in _q_cache:
@@ -133,6 +167,11 @@ def build_position(order_id, label=None):
     total_cost    = round(original_size * price, 4)
     total_payout  = round(original_size, 2)
 
+    current_price = fetch_current_price(token_id)
+    unrealized_pnl = None
+    if current_price is not None and size_matched > 0:
+        unrealized_pnl = round((current_price - price) * size_matched, 4)
+
     return {
         "order_id"         : order_id,
         "label"            : label or question[:40],
@@ -150,6 +189,8 @@ def build_position(order_id, label=None):
         "status"           : "live" if status == "LIVE" else "filled" if status == "MATCHED" else status.lower(),
         "market_date"      : market_date,
         "token_id"         : token_id,
+        "current_price"    : current_price,
+        "unrealized_pnl"   : unrealized_pnl,
     }
 
 def build_ufc_bet(fighter_name, order_ids):
@@ -201,6 +242,11 @@ def build_ufc_bet(fighter_name, order_ids):
         # fallback: use outcome field from last order
         opponent = f1 if fighter_name != f1 else f2
 
+    current_price = fetch_current_price(token_id)
+    unrealized_pnl = None
+    if current_price is not None and total_shares > 0:
+        unrealized_pnl = round((current_price - avg_price) * total_shares, 4)
+
     return {
         "fighter"          : fighter_name,
         "opponent"         : opponent,
@@ -216,6 +262,8 @@ def build_ufc_bet(fighter_name, order_ids):
         "order_ids"        : order_ids,
         "status"           : status,
         "token_id"         : token_id,
+        "current_price"    : current_price,
+        "unrealized_pnl"   : unrealized_pnl,
     }
 
 def git_push():
