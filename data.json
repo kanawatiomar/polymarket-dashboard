@@ -1,8 +1,8 @@
 {
-  "updated": "2026-03-08T00:08:20.713738+00:00",
+  "updated": "2026-03-08T00:13:22.536621+00:00",
   "wallet": "0x85e8B5Ec6d45acF6C1E17bcfbD262442AD59E12B",
-  "usdc_balance": 17.1085,
-  "total_invested": 26.6189,
+  "usdc_balance": 16.4537,
+  "total_invested": 27.7502,
   "realized_pnl": 0,
   "open_orders": [
     {
@@ -11,7 +11,7 @@
       "signal": "YES",
       "price": 0.016,
       "size": 0.0,
-      "filled": 5.08,
+      "filled": 46.007375,
       "cost": 0.0,
       "potential_payout": 0.0,
       "status": "live",
@@ -36,6 +36,17 @@
   ],
   "filled_positions": [
     {
+      "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
+      "signal": "YES",
+      "price": 0.984,
+      "size": 6.229625,
+      "cost": 6.13,
+      "potential_payout": 6.23,
+      "status": "filled",
+      "market_date": "2026-03-08",
+      "token_id": "111947966456906321822907707892284410772654093759193827009430181203596817699546"
+    },
+    {
       "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
       "signal": "NO",
       "price": 0.064,
@@ -45,17 +56,6 @@
       "status": "filled",
       "market_date": "2026-03-08",
       "token_id": "57943352243575948576143629791182850731864186713081832868447637831822276184969"
-    },
-    {
-      "question": "Will the highest temperature in Seattle be between 48-49\u00b0F on March 8?",
-      "signal": "YES",
-      "price": 0.984,
-      "size": 5.08,
-      "cost": 4.9987,
-      "potential_payout": 5.08,
-      "status": "filled",
-      "market_date": "2026-03-08",
-      "token_id": "111947966456906321822907707892284410772654093759193827009430181203596817699546"
     },
     {
       "question": "Will the highest temperature in Buenos Aires be 24\u00b0C or below on March 8?",
